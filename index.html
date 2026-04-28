@@ -435,6 +435,16 @@
       line-height: 1.45;
     }
 
+    .placeholder-box a {
+      color: #252763;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    .placeholder-box a:hover {
+      color: #1d1f50;
+    }
+
     /* --- CUSTOM SAVE MODAL --- */
     .save-modal-overlay {
       position: fixed;
@@ -688,7 +698,19 @@
       <div class="placeholder-box">
         <h2>Link not added yet</h2>
         <p>
-          This button is connected to a placeholder link. Add the correct Smartsheet published/embed link in the code and try again.
+          Please reach out to
+          <a class="placeholder-action-link"
+             href="mailto:Benjamin.Bell@swgas.com?subject=Smartsheet%20Portal%20Link%20Issue">
+            Benjamin.Bell@swgas.com
+          </a>
+          to fix this link, or use the
+          <a class="placeholder-action-link"
+             href="https://app.smartsheet.com/b/form/019a16dd2b3d7e2d96db9a9e8c1aedc7"
+             target="_blank"
+             rel="noopener noreferrer">
+            Project Creation Request Form
+          </a>
+          to create a new project.
         </p>
       </div>
     </div>
@@ -770,7 +792,7 @@
           embedSrc: "https://app.smartsheet.com/b/publish?EQBCT=2e0fb8962bb6449cad85da6fd92c626a"
         },
         {
-          id: "main hr initiative",
+          id: "main-hr-initiative",
           label: "Main HR Initiative #1 (Placeholder)",
           embedSrc: "INSERT_DEPARTMENT_INITIATIVE_LINK_HERE"
         }
@@ -1426,7 +1448,12 @@
 
       const isPortalViewLink = clickedLink.classList.contains("portal-view-link");
       const isProjectViewLink = clickedLink.classList.contains("project-view-link");
+      const isPlaceholderActionLink = clickedLink.classList.contains("placeholder-action-link");
       const href = clickedLink.getAttribute("href");
+
+      if (isPlaceholderActionLink) {
+        return;
+      }
 
       if (isPortalViewLink) {
         event.preventDefault();
