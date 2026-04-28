@@ -1017,6 +1017,12 @@
       placeholderMessage.classList.add("hidden");
     }
 
+    placeholderMessage.addEventListener("click", function(event) {
+      if (event.target === placeholderMessage) {
+        hidePlaceholderMessage();
+      }
+    });
+
     function setViewOnlyNote(shouldShow) {
       if (shouldShow) {
         viewOnlyNote.classList.remove("hidden");
