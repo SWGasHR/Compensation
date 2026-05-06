@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Compensation Project Portal</title>
   <link rel="icon" type="image/png" href="department.png">
+  <link rel="preconnect" href="https://workapps.smartsheet.com">
+  <link rel="dns-prefetch" href="https://workapps.smartsheet.com">
   <style>
     body, html {
       margin: 0;
@@ -329,11 +331,6 @@
       line-height: 1;
     }
 
-    .nav-spacer {
-      flex: 1;
-    }
-
-    /* --- TOP NAV MESSAGE POP-UP --- */
     .nav-reminder-slot {
       flex: 0 1 clamp(245px, 28vw, 390px);
       min-width: 245px;
@@ -400,10 +397,6 @@
       white-space: normal;
     }
 
-    .nav-refresh-popover strong {
-      font-weight: 800;
-    }
-
     .nav-refresh-close {
       position: absolute;
       top: -8px;
@@ -438,7 +431,6 @@
       outline: none;
     }
 
-
     .nav-refresh-close svg {
       width: 9px;
       height: 9px;
@@ -472,8 +464,6 @@
       width: auto;
       display: block;
     }
-
-
 
     /* --- CENTER REMINDER BETWEEN SUPPORT AND LOGO --- */
     .top-nav.reminder-visible .nav-scroll-shell.no-scroll {
@@ -614,7 +604,6 @@
       color: #252763;
     }
 
-
     .archive-empty-message {
       padding: 10px 16px 10px 32px;
       color: #777;
@@ -736,8 +725,6 @@
     .view-only-note strong {
       font-weight: 700;
     }
-
-
 
     /* --- IFRAME AREA --- */
     .iframe-wrap {
@@ -1020,9 +1007,10 @@
 
         <span class="nav-separator" aria-hidden="true">|</span>
 
-        <a class="nav-item portal-view-link"
-           href="#allHrPersonalTasks"
-           data-view-id="allHrPersonalTasks">
+        <a class="nav-item"
+           href="https://workapps.smartsheet.com/app/wJm2VpWWq27w5cPQ5rc399qrFc"
+           target="_blank"
+           rel="noopener noreferrer">
           All HR Personal Tasks
         </a>
 
@@ -1145,11 +1133,11 @@
 
     <a class="swgas-logo-link"
        id="departmentSharePointLink"
-       href="INSERT_DEPARTMENT_SHAREPOINT_URL_HERE"
+       href="https://swgas.sharepoint.com/sites/HR/SitePages/Compensation.aspx"
        target="_blank"
        rel="noopener noreferrer"
-       title="Department SharePoint">
-      <img id="departmentLogo" src="swgas.png" alt="Department logo" class="swgas-logo">
+       title="Compensation SharePoint">
+      <img id="departmentLogo" src="swgas.png" alt="Compensation logo" class="swgas-logo">
     </a>
   </div>
 
@@ -1176,7 +1164,6 @@
     <strong>View-only page.</strong>
     To make updates, open the specific project sheet from the Projects menu.
   </div>
-
 
   <div class="iframe-wrap">
     <div class="iframe-pool" id="iframePool"></div>
@@ -1257,6 +1244,7 @@
         2. To show a project in the Projects dropdown, set visible: true.
         3. To hide a project without deleting it, set visible: false.
         4. Keep id values lowercase with dashes only. Example: "open-enrollment-2026".
+        5. All HR Personal Tasks opens in a new tab and is intentionally not included below in views, so it will not preload as an iframe.
       */
 
       portalTitle: "Compensation Project Portal",
@@ -1296,13 +1284,6 @@
         allDepartmentProjects: {
           label: "All Compensation Projects (View Only)",
           embedSrc: "https://app.smartsheet.com/b/publish?EQBCT=02d933f0f5e74b0598633f7f16834e81",
-          viewOnlyNote: true,
-          refreshNote: false
-        },
-
-        allHrPersonalTasks: {
-          label: "All HR Personal Tasks (View Only)",
-          embedSrc: "https://app.smartsheet.com/b/publish?EQBCT=411b8b11b68440d29c2d27c40b0397ed",
           viewOnlyNote: true,
           refreshNote: false
         }
@@ -1570,6 +1551,13 @@
       });
 
       getVisibleProjects().forEach(function(project) {
+        routes.push({
+          type: "project",
+          id: project.id
+        });
+      });
+
+      getVisibleArchiveProjects().forEach(function(project) {
         routes.push({
           type: "project",
           id: project.id
