@@ -240,6 +240,14 @@
       text-shadow: 0 1px 2px rgba(0,0,0,0.25);
     }
 
+    /* Keep top-level navigation labels from shrinking into partial words.
+       If the nav cannot fit, the scroll controls will appear instead. */
+    .nav-scroll-region > .nav-item,
+    .nav-scroll-region > .dropdown,
+    .nav-scroll-region > .nav-separator {
+      flex: 0 0 auto;
+    }
+
     .nav-item,
     .dropdown-toggle {
       color: white;
@@ -2789,16 +2797,72 @@
       return paddingLeft + paddingRight;
     }
 
+    function getNavContentWidthFromChildren() {
+      if (!navScrollRegion) {
+        return 0;
+      }
+
+      return Array.from(navScrollRegion.children).reduce(function(totalWidth, child) {
+        const childStyles = window.getComputedStyle(child);
+
+        if (childStyles.display === "none" || childStyles.visibility === "hidden") {
+          return totalWidth;
+        }
+
+        const childRect = child.getBoundingClientRect();
+        const marginLeft = parseFloat(childStyles.marginLeft) || 0;
+        const marginRight = parseFloat(childStyles.marginRight) || 0;
+        const naturalWidth = Math.max(child.scrollWidth || 0, childRect.width || 0);
+
+        return totalWidth + naturalWidth + marginLeft + marginRight;
+      }, 0);
+    }
+
+    function navHasPartiallyHiddenItems() {
+      if (!navScrollRegion) {
+        return false;
+      }
+
+      const regionRect = navScrollRegion.getBoundingClientRect();
+      const tolerance = 2;
+
+      return Array.from(navScrollRegion.children).some(function(child) {
+        const childStyles = window.getComputedStyle(child);
+
+        if (childStyles.display === "none" || childStyles.visibility === "hidden") {
+          return false;
+        }
+
+        const childRect = child.getBoundingClientRect();
+        const targetElement = child.classList.contains("dropdown")
+          ? child.querySelector(".dropdown-toggle") || child
+          : child;
+        const targetRect = targetElement.getBoundingClientRect();
+        const targetTextIsClipped = targetElement.scrollWidth > targetElement.clientWidth + tolerance ||
+          targetElement.scrollWidth > targetRect.width + tolerance;
+        const childIsClippedByRegion = childRect.left < regionRect.left - tolerance ||
+          childRect.right > regionRect.right + tolerance;
+
+        return targetTextIsClipped || childIsClippedByRegion;
+      });
+    }
+
     function updateNavScrollControls() {
       if (!navScrollRegion || !navScrollShell) {
         return;
       }
 
       const horizontalPadding = getNavHorizontalPadding();
-      const naturalContentWidth = Math.max(navScrollRegion.scrollWidth - horizontalPadding, 0);
+      const naturalContentWidth = Math.max(
+        navScrollRegion.scrollWidth - horizontalPadding,
+        getNavContentWidthFromChildren()
+      );
       const availableWidthWithoutArrows = navScrollRegion.clientWidth;
       const topNavOverflows = topNav ? topNav.scrollWidth > topNav.clientWidth + 2 : false;
-      const hasOverflow = naturalContentWidth > availableWidthWithoutArrows + 2 || topNavOverflows;
+      const hasPartialItemClipping = navHasPartiallyHiddenItems();
+      const hasOverflow = naturalContentWidth > availableWidthWithoutArrows + 2 ||
+        topNavOverflows ||
+        hasPartialItemClipping;
 
       navScrollShell.classList.toggle("no-scroll", !hasOverflow);
 
