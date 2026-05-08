@@ -1101,8 +1101,14 @@
               Smartsheet Support
             </a>
 
+            <div class="dropdown-divider"></div>
+
             <a id="jobAidMgrLink" href="INSERT_JOB_AID_MGR_LINK_HERE">Job Aid (MGR)</a>
             <a id="jobAidDirLink" href="INSERT_JOB_AID_DIR_LINK_HERE">Job Aid (DIR)</a>
+
+            <div class="dropdown-divider"></div>
+
+            <a id="requestAccessLink" href="#" onclick="openAccessRequestEmail(event)">Request Access</a>
           </div>
         </div>
       </div>
@@ -1402,6 +1408,7 @@
     const smartsheetSupportLink = document.getElementById("smartsheetSupportLink");
     const jobAidMgrLink = document.getElementById("jobAidMgrLink");
     const jobAidDirLink = document.getElementById("jobAidDirLink");
+    const requestAccessLink = document.getElementById("requestAccessLink");
     const placeholderEmailLink = document.getElementById("placeholderEmailLink");
     const placeholderProjectCreationLink = document.getElementById("placeholderProjectCreationLink");
 
@@ -2341,6 +2348,50 @@
       return "mailto:" + cleanEmail + "?subject=Smartsheet%20Portal%20Link%20Issue";
     }
 
+    function openAccessRequestEmail(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      const contactEmail = (PORTAL_CONFIG.contactEmail || "").trim();
+
+      if (!contactEmail || isPlaceholderLink(contactEmail)) {
+        alert("The portal contact email has not been configured yet.");
+        return;
+      }
+
+      const route = parseHashRoute() || defaultRoute();
+      const embedData = getEmbedDataForRoute(route);
+      const portalTitle = replaceDepartmentName(PORTAL_CONFIG.portalTitle || document.title || "Smartsheet Project Portal");
+      const departmentName = replaceDepartmentName(PORTAL_CONFIG.departmentName || "Unknown Department");
+      const currentPage = embedData && embedData.label
+        ? replaceDepartmentName(embedData.label)
+        : "Unknown Page/View";
+      const currentUrl = window.location.href;
+      const submittedAt = new Date().toLocaleString();
+      const subject = encodeURIComponent("Access Request - " + portalTitle);
+      const body = encodeURIComponent(
+        "Hello Ben,\n\n" +
+        "I am requesting access to the Smartsheet portal page listed below.\n\n" +
+        "Portal: " + portalTitle + "\n" +
+        "Department: " + departmentName + "\n" +
+        "Current Page/View: " + currentPage + "\n" +
+        "Page URL: " + currentUrl + "\n" +
+        "Request Date/Time: " + submittedAt + "\n\n" +
+        "Reason for access, optional:\n" +
+        "[Please type reason here]\n\n" +
+        "Thank you!"
+      );
+
+      suppressUnsavedBeforeUnload = true;
+      window.location.href = "mailto:" + contactEmail + "?subject=" + subject + "&body=" + body;
+
+      setTimeout(function() {
+        suppressUnsavedBeforeUnload = false;
+      }, 1500);
+    }
+
     function updateConfiguredLink(linkElement, href, labelText) {
       if (!linkElement) {
         return;
@@ -2559,7 +2610,14 @@
       const isPortalViewLink = clickedLink.classList.contains("portal-view-link");
       const isProjectViewLink = clickedLink.classList.contains("project-view-link");
       const isPlaceholderActionLink = clickedLink.classList.contains("placeholder-action-link");
+      const isRequestAccessLink = clickedLink.id === "requestAccessLink";
       const href = clickedLink.getAttribute("href");
+
+      if (isRequestAccessLink) {
+        event.preventDefault();
+        openAccessRequestEmail(event);
+        return;
+      }
 
       if (isPlaceholderActionLink) {
         return;
